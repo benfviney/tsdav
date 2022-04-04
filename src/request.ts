@@ -10,6 +10,8 @@ import { cleanupFalsy, getDAVAttribute } from './util/requestHelpers';
 
 const debug = getLogger('tsdav:request');
 
+const __PROXY_URL__ = "http://localhost:8001/"
+
 type RawProp = { prop: { [key: string]: any }; status: string; responsedescription?: string };
 type RawResponse = {
   href: string;
@@ -69,7 +71,7 @@ export const davRequest = async (params: {
   //  the original request through to the proxy server, eg. in the body 
   //  or another form in the url
   
-  const newUrl = proxyUrl + url;
+  const newUrl = __PROXY_URL__ + url;
 
   //Finished proxying setup
 
