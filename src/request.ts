@@ -25,8 +25,9 @@ export const davRequest = async (params: {
   init: DAVRequest;
   convertIncoming?: boolean;
   parseOutgoing?: boolean;
+  proxyUrl?: string;
 }): Promise<DAVResponse[]> => {
-  const { url, init, convertIncoming = true, parseOutgoing = true } = params;
+  const { url, init, convertIncoming = true, parseOutgoing = true, proxyUrl = ''} = params;
   const { headers, body, namespace, method, attributes } = init;
   const xmlBody = convertIncoming
     ? convert.js2xml(
@@ -63,7 +64,16 @@ export const davRequest = async (params: {
   // );
   // debug(xmlBody);
 
-  const davResponse = await fetch(url, {
+  //Perform proxing if required.
+  //  Here would also be the place to perform other methods of passing 
+  //  the original request through to the proxy server, eg. in the body 
+  //  or another form in the url
+  
+  const newUrl = proxyUrl + url;
+
+  //Finished proxying setup
+
+  const davResponse = await fetch(newUrl, {
     headers: {
       'Content-Type': 'text/xml;charset=UTF-8',
       ...cleanupFalsy(headers),
@@ -170,8 +180,9 @@ export const propfind = async (params: {
   props: ElementCompact;
   depth?: DAVDepth;
   headers?: Record<string, string>;
+  proxyUrl?: string;
 }): Promise<DAVResponse[]> => {
-  const { url, props, depth, headers } = params;
+  const { url, props, depth, headers, proxyUrl=''} = params;
   return davRequest({
     url,
     init: {
@@ -191,6 +202,7 @@ export const propfind = async (params: {
         },
       },
     },
+    proxyUrl: proxyUrl,
   });
 };
 

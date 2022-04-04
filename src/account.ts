@@ -23,7 +23,7 @@ export const serviceDiscovery = async (params: {
   uri.protocol = endpoint.protocol ?? 'http';
 
   try {
-    const response = await fetch(uri.href, {
+    const response = await fetch(account.proxyUrl + uri.href, {
       headers,
       method: 'PROPFIND',
       redirect: 'manual',
@@ -70,6 +70,7 @@ export const fetchPrincipalUrl = async (params: {
     },
     depth: '0',
     headers,
+    proxyUrl: account.proxyUrl,
   });
   if (!response.ok) {
     debug(`Fetch principal url failed: ${response.statusText}`);
@@ -84,6 +85,7 @@ export const fetchPrincipalUrl = async (params: {
 export const fetchHomeUrl = async (params: {
   account: DAVAccount;
   headers?: Record<string, string>;
+  proxyUrl?: string;
 }): Promise<string> => {
   const { account, headers } = params;
   const requiredFields: Array<'principalUrl' | 'rootUrl'> = ['principalUrl', 'rootUrl'];
@@ -102,6 +104,7 @@ export const fetchHomeUrl = async (params: {
         : { [`${DAVNamespaceShort.CARDDAV}:addressbook-home-set`]: {} },
     depth: '0',
     headers,
+    proxyUrl: account.proxyUrl,
   });
 
   const matched = responses.find((r) => urlContains(account.principalUrl, r.href));

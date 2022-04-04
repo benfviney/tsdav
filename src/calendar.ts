@@ -129,6 +129,7 @@ export const fetchCalendars = async (params?: {
     },
     depth: '1',
     headers,
+    proxyUrl: account.proxyUrl,
   });
 
   return Promise.all(
@@ -163,7 +164,7 @@ export const fetchCalendars = async (params?: {
       })
       .map(async (cal) => ({
         ...cal,
-        reports: await supportedReportSet({ collection: cal, headers }),
+        reports: await supportedReportSet({ collection: cal, headers, proxyUrl: account.proxyUrl }),
       }))
   );
 };

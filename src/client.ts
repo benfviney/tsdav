@@ -53,8 +53,9 @@ export const createDAVClient = async (params: {
   credentials: DAVCredentials;
   authMethod?: 'Basic' | 'Oauth';
   defaultAccountType?: DAVAccount['accountType'] | undefined;
+  providedProxyUrl?: string;
 }) => {
-  const { serverUrl, credentials, authMethod, defaultAccountType } = params;
+  const { serverUrl, credentials, authMethod, defaultAccountType, providedProxyUrl } = params;
   const authHeaders: Record<string, string> =
     // eslint-disable-next-line no-nested-ternary
     authMethod === 'Basic'
@@ -69,6 +70,8 @@ export const createDAVClient = async (params: {
         headers: authHeaders,
       })
     : undefined;
+
+  const proxyUrl = providedProxyUrl ? providedProxyUrl : '';
 
   const davRequest = async (params0: {
     url: string;
@@ -87,6 +90,7 @@ export const createDAVClient = async (params: {
           ...headers,
         },
       },
+      proxyUrl: proxyUrl,
     });
   };
 
@@ -222,16 +226,20 @@ export class DAVClient {
 
   account?: DAVAccount;
 
+  proxyUrl: string;
+
   constructor(params: {
     serverUrl: string;
     credentials: DAVCredentials;
     authMethod?: 'Basic' | 'Oauth';
     defaultAccountType?: DAVAccount['accountType'] | undefined;
+    proxyUrl?: string;
   }) {
     this.serverUrl = params.serverUrl;
     this.credentials = params.credentials;
     this.authMethod = params.authMethod ?? 'Basic';
     this.accountType = params.defaultAccountType ?? 'caldav';
+    this.proxyUrl = params.proxyUrl ?? '';
   }
 
   async login(): Promise<void> {
@@ -249,6 +257,7 @@ export class DAVClient {
             serverUrl: this.serverUrl,
             credentials: this.credentials,
             accountType: this.accountType,
+            proxyUrl: this.proxyUrl,
           },
           headers: this.authHeaders,
         })
@@ -272,6 +281,7 @@ export class DAVClient {
           ...headers,
         },
       },
+      proxyUrl: this.proxyUrl,
     });
   }
 

@@ -60,6 +60,7 @@ export type DAVAccount = {
   homeUrl?: string;
   calendars?: DAVCalendar[];
   addressBooks?: DAVAddressBook[];
+  proxyUrl?: string;
 };
 
 export type DAVVCard = DAVObject;

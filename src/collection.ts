@@ -67,8 +67,9 @@ export const makeCollection = async (params: {
 export const supportedReportSet = async (params: {
   collection: DAVCollection;
   headers?: Record<string, string>;
+  proxyUrl?: string;
 }): Promise<string[]> => {
-  const { collection, headers } = params;
+  const { collection, headers, proxyUrl = '' } = params;
   const res = await propfind({
     url: collection.url,
     props: {
@@ -76,6 +77,7 @@ export const supportedReportSet = async (params: {
     },
     depth: '0',
     headers,
+    proxyUrl: proxyUrl,
   });
   return (
     res[0]?.props?.supportedReportSet?.supportedReport?.map(
