@@ -91,6 +91,7 @@ declare type DAVAccount = {
     homeUrl?: string;
     calendars?: DAVCalendar[];
     addressBooks?: DAVAddressBook[];
+    proxyUrl?: string;
 };
 declare type DAVVCard = DAVObject;
 declare type DAVCalendarObject = DAVObject;
@@ -292,6 +293,7 @@ declare const makeCollection: (params: {
 declare const supportedReportSet: (params: {
     collection: DAVCollection;
     headers?: Record<string, string>;
+    proxyUrl?: string;
 }) => Promise<string[]>;
 declare const isCollectionDirty: (params: {
     collection: DAVCollection;
@@ -318,12 +320,14 @@ declare const davRequest: (params: {
     init: DAVRequest;
     convertIncoming?: boolean;
     parseOutgoing?: boolean;
+    proxyUrl?: string;
 }) => Promise<DAVResponse[]>;
 declare const propfind: (params: {
     url: string;
     props: ElementCompact;
     depth?: DAVDepth;
     headers?: Record<string, string>;
+    proxyUrl?: string;
 }) => Promise<DAVResponse[]>;
 declare const createObject: (params: {
     url: string;
@@ -347,6 +351,7 @@ declare const createDAVClient: (params: {
     credentials: DAVCredentials;
     authMethod?: 'Basic' | 'Oauth';
     defaultAccountType?: DAVAccount['accountType'] | undefined;
+    providedProxyUrl?: string;
 }) => Promise<{
     davRequest: (params0: {
         url: string;
@@ -359,6 +364,7 @@ declare const createDAVClient: (params: {
         props: xml_js.ElementCompact;
         depth?: DAVDepth | undefined;
         headers?: Record<string, string> | undefined;
+        proxyUrl?: string | undefined;
     }) => Promise<DAVResponse[]>;
     createAccount: (params0: {
         account: Optional<DAVAccount, 'serverUrl'>;
@@ -435,6 +441,7 @@ declare const createDAVClient: (params: {
     supportedReportSet: (params: {
         collection: DAVCollection;
         headers?: Record<string, string> | undefined;
+        proxyUrl?: string | undefined;
     }) => Promise<string[]>;
     isCollectionDirty: (params: {
         collection: DAVCollection;
@@ -516,11 +523,13 @@ declare class DAVClient {
     accountType: DAVAccount['accountType'];
     authHeaders?: Record<string, string>;
     account?: DAVAccount;
+    proxyUrl: string;
     constructor(params: {
         serverUrl: string;
         credentials: DAVCredentials;
         authMethod?: 'Basic' | 'Oauth';
         defaultAccountType?: DAVAccount['accountType'] | undefined;
+        proxyUrl?: string;
     });
     login(): Promise<void>;
     davRequest(params0: {
@@ -731,6 +740,7 @@ declare const _default: {
     fetchHomeUrl: (params: {
         account: DAVAccount;
         headers?: Record<string, string> | undefined;
+        proxyUrl?: string | undefined;
     }) => Promise<string>;
     createAccount: (params: {
         account: DAVAccount;
@@ -754,6 +764,7 @@ declare const _default: {
     supportedReportSet: (params: {
         collection: DAVCollection;
         headers?: Record<string, string> | undefined;
+        proxyUrl?: string | undefined;
     }) => Promise<string[]>;
     isCollectionDirty: (params: {
         collection: DAVCollection;
@@ -775,12 +786,14 @@ declare const _default: {
         init: DAVRequest;
         convertIncoming?: boolean | undefined;
         parseOutgoing?: boolean | undefined;
+        proxyUrl?: string | undefined;
     }) => Promise<DAVResponse[]>;
     propfind: (params: {
         url: string;
         props: xml_js.ElementCompact;
         depth?: DAVDepth | undefined;
         headers?: Record<string, string> | undefined;
+        proxyUrl?: string | undefined;
     }) => Promise<DAVResponse[]>;
     createObject: (params: {
         url: string;
@@ -803,6 +816,7 @@ declare const _default: {
         credentials: DAVCredentials;
         authMethod?: "Basic" | "Oauth" | undefined;
         defaultAccountType?: "caldav" | "carddav" | undefined;
+        providedProxyUrl?: string | undefined;
     }) => Promise<{
         davRequest: (params0: {
             url: string;
@@ -815,6 +829,7 @@ declare const _default: {
             props: xml_js.ElementCompact;
             depth?: DAVDepth | undefined;
             headers?: Record<string, string> | undefined;
+            proxyUrl?: string | undefined;
         }) => Promise<DAVResponse[]>;
         createAccount: (params0: {
             account: Optional<DAVAccount, "serverUrl">;
@@ -891,6 +906,7 @@ declare const _default: {
         supportedReportSet: (params: {
             collection: DAVCollection;
             headers?: Record<string, string> | undefined;
+            proxyUrl?: string | undefined;
         }) => Promise<string[]>;
         isCollectionDirty: (params: {
             collection: DAVCollection;

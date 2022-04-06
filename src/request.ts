@@ -66,16 +66,7 @@ export const davRequest = async (params: {
   // );
   // debug(xmlBody);
 
-  //Perform proxing if required.
-  //  Here would also be the place to perform other methods of passing 
-  //  the original request through to the proxy server, eg. in the body 
-  //  or another form in the url
-  
-  const newUrl = __PROXY_URL__ + url;
-
-  //Finished proxying setup
-
-  const davResponse = await fetch(newUrl, {
+  const davResponse = await fetch(__PROXY_URL__ + url, {
     headers: {
       'Content-Type': 'text/xml;charset=UTF-8',
       ...cleanupFalsy(headers),
@@ -214,7 +205,7 @@ export const createObject = async (params: {
   headers?: Record<string, string>;
 }): Promise<Response> => {
   const { url, data, headers } = params;
-  return fetch(url, { method: 'PUT', body: data, headers });
+  return fetch(__PROXY_URL__ + url, { method: 'PUT', body: data, headers });
 };
 
 export const updateObject = async (params: {
@@ -224,7 +215,7 @@ export const updateObject = async (params: {
   headers?: Record<string, string>;
 }): Promise<Response> => {
   const { url, data, etag, headers } = params;
-  return fetch(url, {
+  return fetch(__PROXY_URL__ + url, {
     method: 'PUT',
     body: data,
     headers: cleanupFalsy({ 'If-Match': etag, ...headers }),
@@ -237,7 +228,7 @@ export const deleteObject = async (params: {
   headers?: Record<string, string>;
 }): Promise<Response> => {
   const { url, headers, etag } = params;
-  return fetch(url, {
+  return fetch(__PROXY_URL__ + url, {
     method: 'DELETE',
     headers: cleanupFalsy({ 'If-Match': etag, ...headers }),
   });

@@ -144,9 +144,10 @@ var requestHelpers = /*#__PURE__*/Object.freeze({
 });
 
 const debug$5 = getLogger__default["default"]('tsdav:request');
+const __PROXY_URL__ = "http://localhost:8001/";
 const davRequest = (params) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { url, init, convertIncoming = true, parseOutgoing = true } = params;
+    const { url, init, convertIncoming = true, parseOutgoing = true, proxyUrl = '' } = params;
     const { headers, body, namespace, method, attributes } = init;
     const xmlBody = convertIncoming
         ? convert__default["default"].js2xml(Object.assign(Object.assign({ _declaration: { _attributes: { version: '1.0', encoding: 'utf-8' } } }, body), { _attributes: attributes }), {
@@ -174,7 +175,7 @@ const davRequest = (params) => __awaiter(void 0, void 0, void 0, function* () {
     //   )}`
     // );
     // debug(xmlBody);
-    const davResponse = yield crossFetch.fetch(url, {
+    const davResponse = yield crossFetch.fetch(__PROXY_URL__ + url, {
         headers: Object.assign({ 'Content-Type': 'text/xml;charset=UTF-8' }, cleanupFalsy(headers)),
         body: xmlBody,
         method,
@@ -263,7 +264,7 @@ const davRequest = (params) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 const propfind = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const { url, props, depth, headers } = params;
+    const { url, props, depth, headers, proxyUrl = '' } = params;
     return davRequest({
         url,
         init: {
@@ -283,15 +284,16 @@ const propfind = (params) => __awaiter(void 0, void 0, void 0, function* () {
                 },
             },
         },
+        proxyUrl: proxyUrl,
     });
 });
 const createObject = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { url, data, headers } = params;
-    return crossFetch.fetch(url, { method: 'PUT', body: data, headers });
+    return crossFetch.fetch(__PROXY_URL__ + url, { method: 'PUT', body: data, headers });
 });
 const updateObject = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { url, data, etag, headers } = params;
-    return crossFetch.fetch(url, {
+    return crossFetch.fetch(__PROXY_URL__ + url, {
         method: 'PUT',
         body: data,
         headers: cleanupFalsy(Object.assign({ 'If-Match': etag }, headers)),
@@ -299,7 +301,7 @@ const updateObject = (params) => __awaiter(void 0, void 0, void 0, function* () 
 });
 const deleteObject = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { url, headers, etag } = params;
-    return crossFetch.fetch(url, {
+    return crossFetch.fetch(__PROXY_URL__ + url, {
         method: 'DELETE',
         headers: cleanupFalsy(Object.assign({ 'If-Match': etag }, headers)),
     });
@@ -363,7 +365,7 @@ const makeCollection = (params) => __awaiter(void 0, void 0, void 0, function* (
 });
 const supportedReportSet = (params) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e;
-    const { collection, headers } = params;
+    const { collection, headers, proxyUrl = '' } = params;
     const res = yield propfind({
         url: collection.url,
         props: {
@@ -371,6 +373,7 @@ const supportedReportSet = (params) => __awaiter(void 0, void 0, void 0, functio
         },
         depth: '0',
         headers,
+        proxyUrl: proxyUrl,
     });
     return ((_e = (_d = (_c = (_b = (_a = res[0]) === null || _a === void 0 ? void 0 : _a.props) === null || _b === void 0 ? void 0 : _b.supportedReportSet) === null || _c === void 0 ? void 0 : _c.supportedReport) === null || _d === void 0 ? void 0 : _d.map((sr) => Object.keys(sr.report)[0])) !== null && _e !== void 0 ? _e : []);
 });
@@ -792,6 +795,7 @@ const fetchCalendars = (params) => __awaiter(void 0, void 0, void 0, function* (
         },
         depth: '1',
         headers,
+        proxyUrl: account.proxyUrl,
     });
     return Promise.all(res
         .filter((r) => { var _a, _b; return Object.keys((_b = (_a = r.props) === null || _a === void 0 ? void 0 : _a.resourcetype) !== null && _b !== void 0 ? _b : {}).includes('calendar'); })
@@ -823,7 +827,7 @@ const fetchCalendars = (params) => __awaiter(void 0, void 0, void 0, function* (
         };
     })
         .map((cal) => __awaiter(void 0, void 0, void 0, function* () {
-        return (Object.assign(Object.assign({}, cal), { reports: yield supportedReportSet({ collection: cal, headers }) }));
+        return (Object.assign(Object.assign({}, cal), { reports: yield supportedReportSet({ collection: cal, headers, proxyUrl: account.proxyUrl }) }));
     })));
 });
 const fetchCalendarObjects = (params) => __awaiter(void 0, void 0, void 0, function* () {
@@ -1049,7 +1053,7 @@ const serviceDiscovery = (params) => __awaiter(void 0, void 0, void 0, function*
     const uri = new URL(`/.well-known/${account.accountType}`, endpoint);
     uri.protocol = (_a = endpoint.protocol) !== null && _a !== void 0 ? _a : 'http';
     try {
-        const response = yield crossFetch.fetch(uri.href, {
+        const response = yield crossFetch.fetch(account.proxyUrl + uri.href, {
             headers,
             method: 'PROPFIND',
             redirect: 'manual',
@@ -1088,6 +1092,7 @@ const fetchPrincipalUrl = (params) => __awaiter(void 0, void 0, void 0, function
         },
         depth: '0',
         headers,
+        proxyUrl: account.proxyUrl,
     });
     if (!response.ok) {
         debug$1(`Fetch principal url failed: ${response.statusText}`);
@@ -1113,6 +1118,7 @@ const fetchHomeUrl = (params) => __awaiter(void 0, void 0, void 0, function* () 
             : { [`${exports.DAVNamespaceShort.CARDDAV}:addressbook-home-set`]: {} },
         depth: '0',
         headers,
+        proxyUrl: account.proxyUrl,
     });
     const matched = responses.find((r) => urlContains(account.principalUrl, r.href));
     if (!matched || !matched.ok) {
@@ -1278,7 +1284,7 @@ var authHelpers = /*#__PURE__*/Object.freeze({
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const createDAVClient = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const { serverUrl, credentials, authMethod, defaultAccountType } = params;
+    const { serverUrl, credentials, authMethod, defaultAccountType, providedProxyUrl } = params;
     const authHeaders = 
     // eslint-disable-next-line no-nested-ternary
     authMethod === 'Basic'
@@ -1292,10 +1298,11 @@ const createDAVClient = (params) => __awaiter(void 0, void 0, void 0, function* 
             headers: authHeaders,
         })
         : undefined;
+    const proxyUrl = providedProxyUrl ? providedProxyUrl : '';
     const davRequest$1 = (params0) => __awaiter(void 0, void 0, void 0, function* () {
         const { init } = params0, rest = __rest(params0, ["init"]);
         const { headers } = init, restInit = __rest(init, ["headers"]);
-        return davRequest(Object.assign(Object.assign({}, rest), { init: Object.assign(Object.assign({}, restInit), { headers: Object.assign(Object.assign({}, authHeaders), headers) }) }));
+        return davRequest(Object.assign(Object.assign({}, rest), { init: Object.assign(Object.assign({}, restInit), { headers: Object.assign(Object.assign({}, authHeaders), headers) }), proxyUrl: proxyUrl }));
     });
     const createObject$1 = defaultParam(createObject, {
         url: serverUrl,
@@ -1396,11 +1403,12 @@ const createDAVClient = (params) => __awaiter(void 0, void 0, void 0, function* 
 });
 class DAVClient {
     constructor(params) {
-        var _a, _b;
+        var _a, _b, _c;
         this.serverUrl = params.serverUrl;
         this.credentials = params.credentials;
         this.authMethod = (_a = params.authMethod) !== null && _a !== void 0 ? _a : 'Basic';
         this.accountType = (_b = params.defaultAccountType) !== null && _b !== void 0 ? _b : 'caldav';
+        this.proxyUrl = (_c = params.proxyUrl) !== null && _c !== void 0 ? _c : '';
     }
     login() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1417,6 +1425,7 @@ class DAVClient {
                         serverUrl: this.serverUrl,
                         credentials: this.credentials,
                         accountType: this.accountType,
+                        proxyUrl: this.proxyUrl,
                     },
                     headers: this.authHeaders,
                 })
@@ -1427,7 +1436,7 @@ class DAVClient {
         return __awaiter(this, void 0, void 0, function* () {
             const { init } = params0, rest = __rest(params0, ["init"]);
             const { headers } = init, restInit = __rest(init, ["headers"]);
-            return davRequest(Object.assign(Object.assign({}, rest), { init: Object.assign(Object.assign({}, restInit), { headers: Object.assign(Object.assign({}, this.authHeaders), headers) }) }));
+            return davRequest(Object.assign(Object.assign({}, rest), { init: Object.assign(Object.assign({}, restInit), { headers: Object.assign(Object.assign({}, this.authHeaders), headers) }), proxyUrl: this.proxyUrl }));
         });
     }
     createObject(...params) {
